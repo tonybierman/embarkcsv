@@ -2,7 +2,7 @@
   "profiles": {
     "embarkcsv": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\usr\\var\\embark\\"
+      "commandLineArgs": "C:\\Users\\tonyb\\ownCloud\\Documents\\Dogs\\Genetics\\Embark"
     }
   }
 }

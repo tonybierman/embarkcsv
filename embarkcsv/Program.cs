@@ -10,6 +10,9 @@ namespace EmbarkCsv
     {
         static void Main(string[] args)
         {
+            // Control variables
+            double cv_G = 75;
+
             List<EmbarkSubject> subjects = new List<EmbarkSubject>();
             string[] fileEntries = Directory.GetFiles(args[0], "*.csv");
             int pf = 0;
@@ -58,6 +61,14 @@ namespace EmbarkCsv
             // Sanity check Swab code
             Console.WriteLine($"{subjects.Count(a => a.HasSwabId())} subjects contain a swab code.");
 
+            // Sanity english shepherd
+            Console.WriteLine($"{subjects.Count(a => a.HasEnglishShepherd())} subjects contain English Shepherd.");
+            foreach (var subject in subjects)
+            {
+                if (!subject.HasEnglishShepherd())
+                    subject.Disqualified = true;
+            }
+
             // Sanity check Gender
             Console.WriteLine($"{subjects.Count(a => a.HasSex())} subjects contain a gender value.");
             Console.WriteLine($"{subjects.Count(a => a.Sex() != null && a.Sex().ToLower() == "male")} subjects are male.");
@@ -79,36 +90,38 @@ namespace EmbarkCsv
             Console.WriteLine($"{subjects.Count(a => a.HasLocusA())} subjects have a value for A Locus.");
 
             // Run Hypothesis
-            int isAtAt = 0;
-            Console.WriteLine($"\n\r+++ Running analysis against {fe} subjects.");
-
-            // Hypothesis A Locus
+            int isAtAtEs = 0;
+            Console.WriteLine($"\n\r+++ Running analysis against {subjects.Count()} subjects.");
+            // Hypothesis A Locus and ES > G
             foreach (var s in subjects.Where(a => a.HasLocusA()))
             {
                 if (s.LocusA().ToLower() == "atat")
                 {
-                    isAtAt++;
-                    s.X = s.X + 2;
-                    //Console.WriteLine(s.LocusA());
+                    if (s.EnglishShepherdComposition() > cv_G)
+                    {
+                        s.X = s.X + 2;
+                        isAtAtEs++;
+                    }
                 }
             }
-            Console.WriteLine($"{isAtAt} subjects are AtAt at A Locus");
-            Console.WriteLine($"\n\r+++ Running haplotype tests against the AtAt subset.");
+            Console.WriteLine($"{isAtAtEs} subjects have English Shepherds composition > {cv_G}% with AtAt at A Locus");
+            Console.WriteLine($"\n\r+++ Running haplotype tests against the ES AtAt subset.");
 
             // Females
             var queryFemales = from s in subjects
                 where s.LocusA().ToLower() == "atat" &&
+                    s.EnglishShepherdComposition() > cv_G &&
                     s.Sex() != null &&
                     s.Sex().ToLower() == "female"
                 select s;
 
-            Console.WriteLine($"\n\r++ {queryFemales.ToArray().Length} females are AtAt at A Locus");
+            Console.WriteLine($"\n\r++ {queryFemales.ToArray().Length} ES females are AtAt at A Locus");
             var groupFemales = from gf in queryFemales
                                group gf by gf.HaplotypeToTest() into newGroup
                                orderby newGroup.Key
                                select newGroup;
 
-            Console.WriteLine($"Haplotypes of females who are AtAt at A Locus");
+            Console.WriteLine($"Haplotypes of ES females who are AtAt at A Locus");
             foreach (var s in groupFemales.ToList())
             {
                 Console.WriteLine($"{s.Count()} x {s.Key}");
@@ -128,18 +141,19 @@ namespace EmbarkCsv
 
             // Males
             var queryMales = from s in subjects
-                               where s.LocusA().ToLower() == "atat" &&
-                                   s.Sex() != null &&
-                                   s.Sex().ToLower() == "male"
-                               select s;
+                where s.LocusA().ToLower() == "atat" &&
+                    s.EnglishShepherdComposition() > cv_G &&
+                    s.Sex() != null &&
+                    s.Sex().ToLower() == "male"
+                select s;
 
-            Console.WriteLine($"\n\r++ {queryMales.ToArray().Length} males are AtAt at A Locus");
+            Console.WriteLine($"\n\r++ {queryMales.ToArray().Length} ES males are AtAt at A Locus");
             var groupMales = from gf in queryMales
                                group gf by gf.HaplotypeToTest() into newGroup
                                orderby newGroup.Key
                                select newGroup;
 
-            Console.WriteLine($"Haplotypes of males who are AtAt at A Locus");
+            Console.WriteLine($"Haplotypes of ES males who are AtAt at A Locus");
             foreach (var s in groupMales.ToList())
             {
                 Console.WriteLine($"{s.Count()} x {s.Key}");
@@ -156,7 +170,7 @@ namespace EmbarkCsv
                 }
             }
 
-            Console.WriteLine($"\n\r==== Ratings for {subjects.Count(a => a.HasSwabId())} subjects");
+            Console.WriteLine($"\n\r==== ESBT-X Ratings for {subjects.Count(a => a.HasSwabId())} subjects");
             var groupScores = from gs in subjects
                              group gs by gs.X into newGroup
                              orderby newGroup.Key
@@ -168,6 +182,8 @@ namespace EmbarkCsv
             {
                 Console.WriteLine($"ESBT-{s.Key} x {s.Count()}");
             }
+
+            Console.Read();
         }
     }
 }

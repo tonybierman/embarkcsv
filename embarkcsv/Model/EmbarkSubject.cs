@@ -8,6 +8,8 @@ namespace EmbarkCsv.Model
 {
     public class EmbarkSubject
     {
+        public bool Disqualified { get; set; }
+
         public IEnumerable<EmbarkLineItem> Tests { get; private set; }
 
         public int X { get; set; }
@@ -21,6 +23,32 @@ namespace EmbarkCsv.Model
         {
             return Tests.Any(a => a.Name.ToLower().Contains("swab code"));
         }
+
+        #region Breed
+
+        public bool HasEnglishShepherd()
+        {
+            if (Tests.Any(a => a.Name.ToLower().Contains("english shepherd")))
+                return true;
+            else
+                return false;
+        }
+
+        public double EnglishShepherdComposition()
+        {
+            double result = 0;
+
+            if (HasEnglishShepherd())
+            {
+                var raw = Tests.Where(a => a.Name.ToLower().Contains("english shepherd")).First();
+                double.TryParse(raw.Value.Replace("%", ""), out result);
+            }
+
+            return result;
+        }
+
+        #endregion
+
 
         #region A Locus
 
