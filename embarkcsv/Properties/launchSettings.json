@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "embarkcsv": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\usr\\var\\embark\\"
+    }
+  }
+}
