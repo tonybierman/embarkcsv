@@ -117,9 +117,6 @@ namespace EmbarkCsv
             // Score females for AtAt && PTA control variable
             foreach (var s in queryFemales.ToList())
             {
-                // For AtAt at A Locus
-                s.X = s.X + 2;
-
                 // For MTA control variable
                 if (s.HaplotypeToTest() == "A1a_MT A388_MT" ||
                    s.HaplotypeToTest() == "A1d_MT A247_MT" ||
@@ -151,9 +148,6 @@ namespace EmbarkCsv
             // Score males for AtAt && PTA control variable
             foreach (var s in queryMales.ToList())
             {
-                // For AtAt at A Locus
-                s.X = s.X + 2;
-
                 // For PTA control variable
                 if (s.HaplotypeToTest() == "A1a_Y H1a.29_Y" ||
                    s.HaplotypeToTest() == "A1a_Y H1a.48_Y")
