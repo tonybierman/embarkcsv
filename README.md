@@ -1,5 +1,5 @@
-### Embark CSV
-# This C# console application tests Embark Vet CSV data for the Black and Tan Continuum Hypothesis
+# Embark CSV
+### This C# console application tests Embark Vet CSV data for the Black and Tan Continuum Hypothesis
 
 ## Output 
 ![Screen shot](screenshot.png)
