@@ -12,6 +12,8 @@ namespace EmbarkCsv
         {
             // Control variables
             double cv_G = 75;
+            string[] cv_MTA = new string[] { "A1a_MT A388_MT", "A1d_MT A247_MT", "C2_MT C42/54/55_MT" };
+            string[] cv_PTA = new string[] { "A1a_Y H1a.29_Y", "A1a_Y H1a.48_Y" };
 
             List<EmbarkSubject> subjects = new List<EmbarkSubject>();
             string[] fileEntries = Directory.GetFiles(args[0], "*.csv");
@@ -92,6 +94,13 @@ namespace EmbarkCsv
             // Run Hypothesis
             int isAtAtEs = 0;
             Console.WriteLine($"\n\r+++ Running analysis against {subjects.Count()} subjects.");
+            Console.WriteLine("++ Control Variables for this run are:");
+            Console.WriteLine($"G = {cv_G}%");
+            string pta = string.Join(',', cv_PTA.Select(x => $"'{x}'"));
+            Console.WriteLine($"PTA = {pta}");
+            string mta = string.Join(',', cv_MTA.Select(x => $"'{x}'"));
+            Console.WriteLine($"MTA = {mta}");
+
             // Hypothesis A Locus and ES > G
             foreach (var s in subjects.Where(a => a.HasLocusA()))
             {
@@ -104,7 +113,7 @@ namespace EmbarkCsv
                     }
                 }
             }
-            Console.WriteLine($"{isAtAtEs} subjects have English Shepherds composition > {cv_G}% with AtAt at A Locus");
+            Console.WriteLine($"\n\r{isAtAtEs} subjects have English Shepherds composition > {cv_G}% with AtAt at A Locus");
             Console.WriteLine($"\n\r+++ Running haplotype tests against the ES AtAt subset.");
 
             // Females
@@ -124,16 +133,15 @@ namespace EmbarkCsv
             Console.WriteLine($"Haplotypes of ES females who are AtAt at A Locus");
             foreach (var s in groupFemales.ToList())
             {
-                Console.WriteLine($"{s.Count()} x {s.Key}");
+                string val = cv_MTA.Contains(s.Key) ? "(X = X + 2)" : "";
+                Console.WriteLine($"{s.Count()} x {s.Key} {val}");
             }
             
             // Score females for AtAt && PTA control variable
             foreach (var s in queryFemales.ToList())
             {
                 // For MTA control variable
-                if (s.HaplotypeToTest() == "A1a_MT A388_MT" ||
-                   s.HaplotypeToTest() == "A1d_MT A247_MT" ||
-                   s.HaplotypeToTest() == "C2_MT C42/54/55_MT")
+                if (cv_MTA.Contains(s.HaplotypeToTest()))
                 {
                     s.X = s.X + 2;
                 }
@@ -156,15 +164,15 @@ namespace EmbarkCsv
             Console.WriteLine($"Haplotypes of ES males who are AtAt at A Locus");
             foreach (var s in groupMales.ToList())
             {
-                Console.WriteLine($"{s.Count()} x {s.Key}");
+                string val = cv_PTA.Contains(s.Key) ? "(X = X + 2)" : "";
+                Console.WriteLine($"{s.Count()} x {s.Key} {val}");
             }
 
             // Score males for AtAt && PTA control variable
             foreach (var s in queryMales.ToList())
             {
                 // For PTA control variable
-                if (s.HaplotypeToTest() == "A1a_Y H1a.29_Y" ||
-                   s.HaplotypeToTest() == "A1a_Y H1a.48_Y")
+                if (cv_PTA.Contains(s.HaplotypeToTest()))
                 {
                     s.X = s.X + 2;
                 }
