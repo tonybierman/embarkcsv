@@ -168,23 +168,20 @@ namespace EmbarkCsv.Model
 
         #endregion
 
-        public string HaplotypeToTest()
+        public string[] HaplotypesToTest()
         {
-            string retval = null;
+            List<string> retval = new List<string>();
+            retval.Add($"{this.MaternalHaplogroup()} {this.MaternalHaplotype()}");
 
             if (this.HasSex())
             {
-                if (this.Sex().ToLower() == "female")
+                if (this.Sex().ToLower() == "male")
                 {
-                    retval = $"{this.MaternalHaplogroup()} {this.MaternalHaplotype()}";
-                }
-                else if (this.Sex().ToLower() == "male")
-                {
-                    retval = $"{this.PaternalHaplogroup()} {this.PaternalHaplotype()}";
+                    retval.Add($"{this.PaternalHaplogroup()} {this.PaternalHaplotype()}");
                 }
             }
 
-            return retval;
+            return retval.ToArray();
         }
     }
 }

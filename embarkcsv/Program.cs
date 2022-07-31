@@ -116,7 +116,46 @@ namespace EmbarkCsv
             Console.WriteLine($"\n\r{isAtAtEs} subjects have English Shepherds composition > {cv_G}% with AtAt at A Locus");
             Console.WriteLine($"\n\r+++ Running haplotype tests against the ES AtAt subset.");
 
+            // Males
+            var queryMales = from s in subjects
+                             where s.LocusA().ToLower() == "atat" &&
+                                 s.EnglishShepherdComposition() > cv_G &&
+                                 s.Sex() != null &&
+                                 s.Sex().ToLower() == "male"
+                             select s;
+
+
+
+            Console.WriteLine($"\n\r++ {queryMales.ToArray().Length} ES males are AtAt at A Locus");
+            var groupMales = from gf in queryMales
+                             group gf by gf.HaplotypesToTest()[1] into newGroup
+                             orderby newGroup.Key
+                             select newGroup;
+
+            Console.WriteLine($"Haplotypes of ES males who are AtAt at A Locus");
+            foreach (var s in groupMales.ToList())
+            {
+                string val = cv_PTA.Contains(s.Key) ? "(X = X + 2)" : "";
+                Console.WriteLine($"{s.Count()} x {s.Key} {val}");
+            }
+
+            // Build dynamic maternal haplotype list from maternal list control variable and males' maternal haplotypes
+            List<string> dyn_MTA = new List<string>();
+            dyn_MTA.AddRange(cv_MTA);
+
+            // Score males for AtAt && PTA control variable
+            foreach (var s in queryMales.ToList())
+            {
+                // For PTA control variable
+                if (cv_PTA.Contains(s.HaplotypesToTest()[1]))
+                {
+                    s.X = s.X + 2;
+                    dyn_MTA.Add(s.HaplotypesToTest()[0]);
+                }
+            }
+
             // Females
+            dyn_MTA = dyn_MTA.Distinct().ToList();
             var queryFemales = from s in subjects
                 where s.LocusA().ToLower() == "atat" &&
                     s.EnglishShepherdComposition() > cv_G &&
@@ -126,14 +165,14 @@ namespace EmbarkCsv
 
             Console.WriteLine($"\n\r++ {queryFemales.ToArray().Length} ES females are AtAt at A Locus");
             var groupFemales = from gf in queryFemales
-                               group gf by gf.HaplotypeToTest() into newGroup
+                               group gf by gf.HaplotypesToTest()[0] into newGroup
                                orderby newGroup.Key
                                select newGroup;
 
             Console.WriteLine($"Haplotypes of ES females who are AtAt at A Locus");
             foreach (var s in groupFemales.ToList())
             {
-                string val = cv_MTA.Contains(s.Key) ? "(X = X + 2)" : "";
+                string val = dyn_MTA.Contains(s.Key) ? "(X = X + 2)" : "";
                 Console.WriteLine($"{s.Count()} x {s.Key} {val}");
             }
             
@@ -141,43 +180,13 @@ namespace EmbarkCsv
             foreach (var s in queryFemales.ToList())
             {
                 // For MTA control variable
-                if (cv_MTA.Contains(s.HaplotypeToTest()))
+                if (dyn_MTA.Contains(s.HaplotypesToTest()[0]))
                 {
                     s.X = s.X + 2;
                 }
             }
 
-            // Males
-            var queryMales = from s in subjects
-                where s.LocusA().ToLower() == "atat" &&
-                    s.EnglishShepherdComposition() > cv_G &&
-                    s.Sex() != null &&
-                    s.Sex().ToLower() == "male"
-                select s;
-
-            Console.WriteLine($"\n\r++ {queryMales.ToArray().Length} ES males are AtAt at A Locus");
-            var groupMales = from gf in queryMales
-                               group gf by gf.HaplotypeToTest() into newGroup
-                               orderby newGroup.Key
-                               select newGroup;
-
-            Console.WriteLine($"Haplotypes of ES males who are AtAt at A Locus");
-            foreach (var s in groupMales.ToList())
-            {
-                string val = cv_PTA.Contains(s.Key) ? "(X = X + 2)" : "";
-                Console.WriteLine($"{s.Count()} x {s.Key} {val}");
-            }
-
-            // Score males for AtAt && PTA control variable
-            foreach (var s in queryMales.ToList())
-            {
-                // For PTA control variable
-                if (cv_PTA.Contains(s.HaplotypeToTest()))
-                {
-                    s.X = s.X + 2;
-                }
-            }
-
+            // Final scores
             Console.WriteLine($"\n\r==== ESBT-X Ratings for {subjects.Count(a => a.HasSwabId())} subjects");
             var groupScores = from gs in subjects
                              group gs by gs.X into newGroup
