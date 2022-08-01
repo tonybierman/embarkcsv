@@ -20,7 +20,7 @@ namespace EmbarkCsv
             int pf = 0;
             int fe = fileEntries.Length;
             Console.WriteLine($"\n\r+++ Running sanity check for Embark data set");
-            Console.WriteLine($"{fe} Embark csv files found.");
+            Console.Write($"{fe} Embark csv files found, ");
             foreach (var fname in fileEntries)
             {
                 List<EmbarkLineItem> data = new List<EmbarkLineItem>();
@@ -57,7 +57,7 @@ namespace EmbarkCsv
                 subjects.Add(new EmbarkSubject(data));
             }
 
-            Console.WriteLine($"{pf} csv files parsed.");
+            Console.Write($"{pf} csv files parsed, ");
             Console.WriteLine($"{subjects.Count} subjects deserialized.");
 
             // Sanity check Swab code
@@ -72,18 +72,18 @@ namespace EmbarkCsv
             }
 
             // Sanity check Gender
-            Console.WriteLine($"{subjects.Count(a => a.HasSex())} subjects contain a gender value.");
-            Console.WriteLine($"{subjects.Count(a => a.Sex() != null && a.Sex().ToLower() == "male")} subjects are male.");
+            Console.Write($"{subjects.Count(a => a.HasSex())} subjects contain a sex value, ");
+            Console.Write($"{subjects.Count(a => a.Sex() != null && a.Sex().ToLower() == "male")} subjects are male, ");
             Console.WriteLine($"{subjects.Count(a => a.Sex() != null && a.Sex().ToLower() == "female")} subjects are female.");
 
             // Sanity check Paternal haplotype
-            Console.WriteLine($"{subjects.Count(a => a.HasPaternalHaplotype())} subjects have a value for paternal haplotype.");
-
-            // Sanity check Maternal haplotype
-            Console.WriteLine($"{subjects.Count(a => a.HasMaternalHaplotype())} subjects have a value for maternal haplotype.");
+            Console.Write($"{subjects.Count(a => a.HasPaternalHaplotype())} subjects have a value for paternal haplotype, ");
 
             // Sanity check Paternal haplogroup
             Console.WriteLine($"{subjects.Count(a => a.HasPaternalHaplogroup())} subjects have a value for paternal haplogroup.");
+
+            // Sanity check Maternal haplotype
+            Console.Write($"{subjects.Count(a => a.HasMaternalHaplotype())} subjects have a value for maternal haplotype, ");
 
             // Sanity check Maternal haplogroup
             Console.WriteLine($"{subjects.Count(a => a.HasMaternalHaplogroup())} subjects have a value for maternal haplogroup.");
@@ -93,7 +93,7 @@ namespace EmbarkCsv
 
             // Run Hypothesis
             int isAtAtEs = 0;
-            Console.WriteLine($"\n\r+++ Running analysis against {subjects.Count()} subjects.");
+            Console.WriteLine($"\n\r+++ Running analysis against {subjects.Count()} subjects.\r\n");
             Console.WriteLine("++ Control Variables for this run are:");
             Console.WriteLine($"G = {cv_G}%");
             string pta = string.Join(',', cv_PTA.Select(x => $"'{x}'"));
@@ -113,7 +113,7 @@ namespace EmbarkCsv
                     }
                 }
             }
-            Console.WriteLine($"\n\r{isAtAtEs} subjects have English Shepherds composition > {cv_G}% with AtAt at A Locus");
+            Console.WriteLine($"\n\r{isAtAtEs} subjects have English Shepherd composition > {cv_G}% AND are AtAt at A Locus");
             Console.WriteLine($"\n\r+++ Running haplotype tests against the ES AtAt subset.");
 
             // Males
@@ -156,6 +156,9 @@ namespace EmbarkCsv
 
             // Females
             dyn_MTA = dyn_MTA.Distinct().ToList();
+            string dmta = string.Join(',', dyn_MTA.Select(x => $"'{x}'"));
+            Console.WriteLine($"\r\nIn addition to the MTA control variable array, this program will use maternal haplotypes of included males to score females: {dmta}");
+
             var queryFemales = from s in subjects
                 where s.LocusA().ToLower() == "atat" &&
                     s.EnglishShepherdComposition() > cv_G &&
